@@ -3,7 +3,7 @@ from transformers import pipeline
 
 app = Flask(__name__)
 
-checkpoint_path = "../src/checkpoints/rugpt3large_volk_epochs-3"
+checkpoint_path = "./checkpoints/rugpt3large_volk_epochs-3"
 device = "cpu"
 generator = pipeline("text-generation", model=checkpoint_path)
 contrastive_search_generation_config = {
@@ -20,8 +20,10 @@ def simple_response():
 @app.route("/generate", methods=["GET", "POST"])
 def generate():
     prompts = request.get_json()["prompts"]
+    print(prompts)
     output = generator(prompts, **contrastive_search_generation_config)
+    print(output)
     return jsonify(output)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True, host="0.0.0.0")
