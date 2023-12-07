@@ -1,17 +1,17 @@
+import json
+from pathlib import Path
+
 from flask import Flask, request, jsonify
 from transformers import pipeline
 
 app = Flask(__name__)
 
-checkpoint_path = "./checkpoints/rugpt3large_volk_epochs-3"
+checkpoint_path = Path("./checkpoints/rugpt3large_volk_epochs-20")
 device = "cpu"
 generator = pipeline("text-generation", model=checkpoint_path)
-contrastive_search_generation_config = {
-    "do_sample": True,
-    "top_k": 4,
-    "penalty_alpha": 0.6
-}
 
+with open(checkpoint_path / "custom_generation_config.json", "r") as file:
+    custom_generation_config = json.load(file)
 
 @app.route("/", methods=["GET", "POST"])
 def simple_response():
@@ -20,10 +20,8 @@ def simple_response():
 @app.route("/generate", methods=["GET", "POST"])
 def generate():
     prompts = request.get_json()["prompts"]
-    print(prompts)
-    output = generator(prompts, **contrastive_search_generation_config)
-    print(output)
+    output = generator(prompts, **custom_generation_config)
     return jsonify(output)
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5001)

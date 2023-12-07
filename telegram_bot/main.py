@@ -8,7 +8,7 @@ class Bot(Enum):
     VOLK='Волк'
     PUSHKIN='Пушкин'
 
-TEXT_GENERATOR_URL='http://basic-text-generator-text_generator-1:5000/generate'
+TEXT_GENERATOR_URL='http://basic-text-generator-text_generator-1:5001/generate'
 BOT_TOKEN="5142077483:AAEPrYHJ4kMlWD4Ixvbn7U8Aw9QgV14Wfc0"
 current_bot=Bot.VOLK
 

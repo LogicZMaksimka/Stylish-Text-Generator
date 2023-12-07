@@ -3,19 +3,24 @@ networks:
     driver: bridge
 
 services:
+  dataloader:
+    build: data
+    volumes:
+      - ./data/checkpoints:/home/data/checkpoints
+  
   text_generator:
     build: text_generator
-    ports:
-      - "5000:5000"
     volumes:
-      - ./text_generator/main.py:/main.py
+      - ./data/checkpoints:/home/text_generator/checkpoints
+    ports:
+      - "5001:5001"
     networks:
       - isolation-network
+    depends_on:
+      - dataloader
       
   telegram_bot:
     build: telegram_bot
-    volumes:
-      - ./telegram_bot/main.py:/main.py
     networks:
       - isolation-network
     depends_on:
