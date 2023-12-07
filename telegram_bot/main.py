@@ -8,14 +8,15 @@ class Bot(Enum):
     VOLK='Волк'
     PUSHKIN='Пушкин'
 
-TEXT_GENERATOR_URL='http://basic-text-generator-text_generator-1:5001/generate'
+TEXT_GENERATOR_URL='http://basic-text-generator-text_generator-1:5001'
+GENERATE_TEXT_URL=TEXT_GENERATOR_URL + "/generate"
+CHANGE_MODEL_URL=TEXT_GENERATOR_URL + "/change_model"
 BOT_TOKEN="5142077483:AAEPrYHJ4kMlWD4Ixvbn7U8Aw9QgV14Wfc0"
-current_bot=Bot.VOLK
 
 
 async def reply_with_model_response(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     prompt=update.message.text
-    json_reply = requests.post(TEXT_GENERATOR_URL, json={"prompts": prompt}).json()
+    json_reply = requests.post(GENERATE_TEXT_URL, json={"prompts": prompt}).json()
     reply = json_reply[0]["generated_text"]
     await update.message.reply_text(reply)
 
@@ -35,11 +36,15 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     await update.message.reply_text("Напиши команду /start чтобы начать генерацию сообщений")
 
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    # Get new bot name
     query = update.callback_query
     bot_name = query.data
-    current_bot = Bot[bot_name]
-    bot_readble_name = current_bot.value
+
+    # Update model in text_generator
+    requests.post(CHANGE_MODEL_URL, json={"bot": bot_name})
     
+    # Print user's choice
+    bot_readble_name = Bot[bot_name].value
     await query.answer()
     await query.edit_message_text(text=f"Вы выбрали бота: {bot_readble_name}")
 

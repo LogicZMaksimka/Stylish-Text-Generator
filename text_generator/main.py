@@ -6,21 +6,37 @@ from transformers import pipeline
 
 app = Flask(__name__)
 
-checkpoint_path = Path("./checkpoints/rugpt3large_volk_epochs-20")
-device = "cpu"
-generator = pipeline("text-generation", model=checkpoint_path)
 
-with open(checkpoint_path / "custom_generation_config.json", "r") as file:
-    custom_generation_config = json.load(file)
+def chackpoint2pipeline(checkpoint_path):
+    checkpoint_path = Path(checkpoint_path)
+    pipe = pipeline("text-generation", model=checkpoint_path)
+    with open(checkpoint_path / "custom_generation_config.json", "r") as file:
+        custom_generation_config = json.load(file)
+    return lambda prompts: pipe(prompts, **custom_generation_config)
+
+
+model2path = {
+    "VOLK": "./checkpoints/rugpt3large_volk_epochs-20",
+    "PUSHKIN": "./checkpoints/rugpt3large_pushkin_epochs-30"
+}
+generator_pipeline = chackpoint2pipeline(model2path["VOLK"])
+
 
 @app.route("/", methods=["GET", "POST"])
 def simple_response():
     return "Text Generator"
 
-@app.route("/generate", methods=["GET", "POST"])
+@app.route("/change_model", methods=["POST"])
+def change_model():
+    request_data = request.get_json()
+    checkpoint_path = model2path[request_data["bot"]]
+    global generator_pipeline
+    generator_pipeline = chackpoint2pipeline(checkpoint_path)
+
+@app.route("/generate", methods=["POST"])
 def generate():
-    prompts = request.get_json()["prompts"]
-    output = generator(prompts, **custom_generation_config)
+    request_data = request.get_json()
+    output = generator_pipeline(request_data["prompts"])
     return jsonify(output)
 
 if __name__ == "__main__":
