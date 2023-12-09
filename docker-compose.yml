@@ -3,11 +3,11 @@ services:
     container_name: postgres_container
     image: postgres:latest
     environment:
-      POSTGRES_DB: "text_generator_db"
-      POSTGRES_USER: "user"
-      POSTGRES_PASSWORD: "password"
-      PGDATA: "/var/lib/postgresql/data/pgdata"
-      POSTGRES_PORT: 5432
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - PGDATA
+      - POSTGRES_PORT
     volumes:
       - ./postgresql/init_scripts:/docker-entrypoint-initdb.d
       - ./postgresql:/var/lib/postgresql/data
@@ -40,13 +40,12 @@ services:
     volumes:
       - ./data/checkpoints:/home/text_generator/checkpoints
     environment:
-      POSTGRES_HOST: "postgres_container"
-      POSTGRES_DB: "text_generator_db"
-      POSTGRES_USER: "user"
-      POSTGRES_PASSWORD: "password"
-      PGDATA: "/var/lib/postgresql/data/pgdata"
-      POSTGRES_PORT: 5432
-      CUDA_VISIBLE_DEVICES: 0
+      - POSTGRES_HOST
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - PGDATA
+      - POSTGRES_PORT
     ports:
       - "5001:5001"
     networks:
