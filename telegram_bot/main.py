@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 
 import requests
@@ -11,7 +12,9 @@ class Bot(Enum):
 TEXT_GENERATOR_URL='http://text_generator_container:5001'
 GENERATE_TEXT_URL=TEXT_GENERATOR_URL + "/generate"
 CHANGE_MODEL_URL=TEXT_GENERATOR_URL + "/change_model"
-BOT_TOKEN="5142077483:AAEPrYHJ4kMlWD4Ixvbn7U8Aw9QgV14Wfc0"
+TG_TOKEN_PATH = os.getenv('TG_TOKEN')
+with open(TG_TOKEN_PATH, "r") as file:
+    TG_TOKEN = file.readline()
 
 
 async def reply_with_model_response(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -68,7 +71,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await query.edit_message_text(text=f"Вы выбрали бота: {bot_readble_name}")
 
 def main():
-    application = Application.builder().token(BOT_TOKEN).build()
+    application = Application.builder().token(TG_TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
@@ -82,40 +85,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# bot = telebot.TeleBot(bot_token)
-
-
-# def get_response(prompts):
-#     res = requests.post(, json={"prompts": prompts})
-
-# @bot.message_handler()
-# def reply(message):
-    
-#     if message.text
-
-#     model_output = 
-#     reply = model_output['generated_text']
-#     bot.reply_to(message, message.text)
-
-# if __name__ == "__main__":
-#     bot.infinity_polling()

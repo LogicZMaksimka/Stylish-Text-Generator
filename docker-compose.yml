@@ -1,24 +1,20 @@
-networks:
-  isolation-network:
-    driver: bridge
-
 services:
   postgres:
     container_name: postgres_container
     image: postgres:latest
     environment:
-      POSTGRES_DB: "habrdb"
-      POSTGRES_USER: "habrpguser"
-      POSTGRES_PASSWORD: "pgpwd4habr"
+      POSTGRES_DB: "text_generator_db"
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "password"
       PGDATA: "/var/lib/postgresql/data/pgdata"
       POSTGRES_PORT: 5432
     volumes:
       - ./postgresql/init_scripts:/docker-entrypoint-initdb.d
-      - ./postgresql/database:/var/lib/postgresql/data
+      - ./postgresql:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U habrpguser -d habrdb"]
+      test: ["CMD-SHELL", "pg_isready -U user -d text_generator_db"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -45,9 +41,9 @@ services:
       - ./data/checkpoints:/home/text_generator/checkpoints
     environment:
       POSTGRES_HOST: "postgres_container"
-      POSTGRES_DB: "habrdb"
-      POSTGRES_USER: "habrpguser"
-      POSTGRES_PASSWORD: "pgpwd4habr"
+      POSTGRES_DB: "text_generator_db"
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "password"
       PGDATA: "/var/lib/postgresql/data/pgdata"
       POSTGRES_PORT: 5432
       CUDA_VISIBLE_DEVICES: 0
@@ -62,7 +58,20 @@ services:
   telegram_bot:
     container_name: telegram_bot_container
     build: telegram_bot
+    environment:
+      TG_TOKEN: /run/secrets/telegram_bot_token
     networks:
       - isolation-network
     depends_on:
       - text_generator
+    secrets:
+      - telegram_bot_token  
+
+secrets:
+  telegram_bot_token:
+    file: ./telegram_bot/token.txt
+
+
+networks:
+  isolation-network:
+    driver: bridge
