@@ -1,3 +1,4 @@
 Flask
 torch
 transformers
+psycopg2

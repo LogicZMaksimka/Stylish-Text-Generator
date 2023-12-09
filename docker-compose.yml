@@ -3,23 +3,64 @@ networks:
     driver: bridge
 
 services:
+  postgres:
+    container_name: postgres_container
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: "habrdb"
+      POSTGRES_USER: "habrpguser"
+      POSTGRES_PASSWORD: "pgpwd4habr"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+      POSTGRES_PORT: 5432
+    volumes:
+      - ./postgresql/init_scripts:/docker-entrypoint-initdb.d
+      - ./postgresql/database:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U habrpguser -d habrdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
+    networks:
+      - isolation-network
+  
   dataloader:
+    container_name: dataloader_container
     build: data
     volumes:
       - ./data/checkpoints:/home/data/checkpoints
   
   text_generator:
+    container_name: text_generator_container
     build: text_generator
     volumes:
       - ./data/checkpoints:/home/text_generator/checkpoints
+    environment:
+      POSTGRES_HOST: "postgres_container"
+      POSTGRES_DB: "habrdb"
+      POSTGRES_USER: "habrpguser"
+      POSTGRES_PASSWORD: "pgpwd4habr"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+      POSTGRES_PORT: 5432
+      CUDA_VISIBLE_DEVICES: 0
     ports:
       - "5001:5001"
     networks:
       - isolation-network
     depends_on:
       - dataloader
+      - postgres
       
   telegram_bot:
+    container_name: telegram_bot_container
     build: telegram_bot
     networks:
       - isolation-network
