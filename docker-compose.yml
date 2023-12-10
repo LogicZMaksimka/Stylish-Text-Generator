@@ -59,11 +59,6 @@ services:
         limits:
           cpus: '4'
           memory: 8G
-        # reservations:
-        #   cpus: '0.25'
-        #   memory: 20M
-        #   devices:
-        #   - capabilities: ["gpu"]
       
   telegram_bot:
     container_name: telegram_bot_container

@@ -15,34 +15,30 @@ POSTGRES_USER = os.getenv('POSTGRES_USER')
 POSTGRES_DB = os.getenv('POSTGRES_DB')
 POSTGRES_PORT = os.getenv('POSTGRES_PORT')
 POSTGRES_HOST = os.getenv('POSTGRES_HOST')
-database_connection = psycopg2.connect(dbname=POSTGRES_DB,
-                                       user=POSTGRES_USER, 
-                                       host=POSTGRES_HOST, 
-                                       port=POSTGRES_PORT, 
-                                       password=POSTGRES_PASSWORD)
+database_connection = psycopg2.connect(
+    dbname=POSTGRES_DB,
+    user=POSTGRES_USER,
+    host=POSTGRES_HOST,
+    port=POSTGRES_PORT,
+    password=POSTGRES_PASSWORD
+)
 
-def checkpoint2pipeline(checkpoint_path):
+def checkpoint2pipeline(checkpoint_path: str):
     checkpoint_path = Path(checkpoint_path)
     pipe = pipeline("text-generation", model=checkpoint_path)
-    with open(checkpoint_path / "custom_generation_config.json", "r") as file:
+    with open(checkpoint_path / "custom_generation_config.json", "r", encoding='UTF-8') as file:
         custom_generation_config = json.load(file)
     return lambda prompts: pipe(prompts, **custom_generation_config)
-
 
 model2pipleine = {
     "VOLK": checkpoint2pipeline("./checkpoints/rugpt3large_volk_epochs-20"),
     "PUSHKIN": checkpoint2pipeline("./checkpoints/rugpt3large_pushkin_epochs-30")
 }
 
-# model2pipleine = {
-#     "VOLK": lambda x: [{"generated_text": "Волк"}],
-#     "PUSHKIN": lambda x: [{"generated_text": "Пушкин"}]
-# }
-
-
-def update_user_model(user_id, username, current_model):
+def update_user_model(user_id: int, username: str, current_model: str):
     with database_connection.cursor() as curs:
-        curs.execute(f"""
+        curs.execute(
+        f"""
             INSERT INTO user_table (user_id, username, current_model) 
             VALUES ({user_id}, '{username}','{current_model}')
             ON CONFLICT (user_id)
@@ -50,14 +46,13 @@ def update_user_model(user_id, username, current_model):
         """)
         database_connection.commit()
 
-def get_user_model(user_id):
-     with database_connection.cursor() as curs:
+def get_user_model(user_id: int):
+    with database_connection.cursor() as curs:
         curs.execute(f"""SELECT user_id, current_model FROM user_table WHERE (user_id = '{user_id}')""")
         row = curs.fetchone()
         if row:
             return row[-1]
-        else:
-            return DEFAULT_MODEL
+        return DEFAULT_MODEL
 
 
 @app.route("/", methods=["GET", "POST"])
