@@ -42,10 +42,21 @@ async def choose_model_menu(update, context):
     await update.message.reply_text("Выберите одну из доступных моделей:", reply_markup=reply_markup)
 
 async def start(update, context):
-    await update.message.reply_text("Для начала работы с ботом...")
+    welcome_message = """
+
+    Здравствуй пользователь\! 
+    
+    Этот бот генерирует продолжения ваших сообщений в различных стилях\. На данный момент поддерживаются 2 модели\:
+    \- Бот Волк \- обучался на мемах с "волчьими цитатами"
+    \- Бот Пушкин \- обучался на собрании стихов Пушкина
+
+    Для смены бота используйте команду /bot
+    """
+    await update.message.reply_text(welcome_message, parse_mode='MarkdownV2')
+    await choose_model_menu(update, context)
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text("Напиши команду /start чтобы начать генерацию сообщений")
+    await update.message.reply_text("Для смены бота используйте команду /bot")
 
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
