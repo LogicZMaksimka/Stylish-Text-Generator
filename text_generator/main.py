@@ -21,6 +21,25 @@ database_connection = psycopg2.connect(dbname=POSTGRES_DB,
                                        port=POSTGRES_PORT, 
                                        password=POSTGRES_PASSWORD)
 
+def checkpoint2pipeline(checkpoint_path):
+    checkpoint_path = Path(checkpoint_path)
+    pipe = pipeline("text-generation", model=checkpoint_path)
+    with open(checkpoint_path / "custom_generation_config.json", "r") as file:
+        custom_generation_config = json.load(file)
+    return lambda prompts: pipe(prompts, **custom_generation_config)
+
+
+model2pipleine = {
+    "VOLK": checkpoint2pipeline("./checkpoints/rugpt3large_volk_epochs-20"),
+    "PUSHKIN": checkpoint2pipeline("./checkpoints/rugpt3large_pushkin_epochs-30")
+}
+
+# model2pipleine = {
+#     "VOLK": lambda x: [{"generated_text": "Волк"}],
+#     "PUSHKIN": lambda x: [{"generated_text": "Пушкин"}]
+# }
+
+
 def update_user_model(user_id, username, current_model):
     with database_connection.cursor() as curs:
         curs.execute(f"""
@@ -40,23 +59,6 @@ def get_user_model(user_id):
         else:
             return DEFAULT_MODEL
 
-def chackpoint2pipeline(checkpoint_path):
-    checkpoint_path = Path(checkpoint_path)
-    pipe = pipeline("text-generation", model=checkpoint_path)
-    with open(checkpoint_path / "custom_generation_config.json", "r") as file:
-        custom_generation_config = json.load(file)
-    return lambda prompts: pipe(prompts, **custom_generation_config)
-
-model2path = {
-    "VOLK": "./checkpoints/rugpt3large_volk_epochs-20",
-    "PUSHKIN": "./checkpoints/rugpt3large_pushkin_epochs-30"
-}
-model2pipleine = {
-    "VOLK": lambda x: [{"generated_text": "Волк"}],
-    "PUSHKIN": lambda x: [{"generated_text": "Пушкин"}]
-}
-# generator_pipeline = chackpoint2pipeline(model2path["VOLK"])
-generator_pipeline = lambda x: [{"generated_text": "Волк"}]
 
 @app.route("/", methods=["GET", "POST"])
 def simple_response():
@@ -78,10 +80,8 @@ def change_model():
 def generate():
     request_data = request.get_json()
 
-    # Get model name from the table
+    # Choose the last model requested by user
     model_name = get_user_model(request_data["user"]["id"])
-
-    # Choose the right model for generation
     generator_pipeline = model2pipleine[model_name]
 
     # Run generation pipeline

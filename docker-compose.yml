@@ -53,6 +53,17 @@ services:
     depends_on:
       - dataloader
       - postgres
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 8G
+        # reservations:
+        #   cpus: '0.25'
+        #   memory: 20M
+        #   devices:
+        #   - capabilities: ["gpu"]
       
   telegram_bot:
     container_name: telegram_bot_container
@@ -69,7 +80,6 @@ services:
 secrets:
   telegram_bot_token:
     file: ./telegram_bot/token.txt
-
 
 networks:
   isolation-network:

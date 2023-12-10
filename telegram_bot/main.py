@@ -50,9 +50,6 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     
-    # print user data
-    # print(update)
-    #
     # Update model for specific user
     user = query.from_user
     bot_name = query.data
