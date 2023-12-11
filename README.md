@@ -25,3 +25,4 @@ docker-compose up
     * Требуется около 5G памяти
 
 
+![alt text](/home/logiczmaksimka/Documents/MIPT/9sem/python_basics/Basic-Text-Generator/pictures/project_structure.drawio.png)
