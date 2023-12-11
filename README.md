@@ -5,6 +5,9 @@
 * Бот Волк - обучавшийся на мемах с "волчьими цитатами"
 * Бот Пушкин - обучавшийся на собрании стихов Пушкина
 
+## Структура проекта
+![plot](pictures/project_structure_with_background.drawio.png)
+
 ## Запуск
 Для запуска приложения нужно в корне проекта запустить команду
 
@@ -23,6 +26,3 @@ docker-compose up
     * Время генерации одного сообщения при использовании бота "Волк" не более 3 секунд и вплоть до 30 секунд при генерации длинных сообщений ботом "Пушкин"
 * При запуске на GPU:
     * Требуется около 5G памяти
-
-
-![alt text](/home/logiczmaksimka/Documents/MIPT/9sem/python_basics/Basic-Text-Generator/pictures/project_structure.drawio.png)
